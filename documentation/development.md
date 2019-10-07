@@ -53,7 +53,7 @@ First, checkout and install the operator-sdk CLI:
 
 ```sh
 $ cd $GOPATH/src/github.com/operator-framework/operator-sdk
-$ git checkout v0.7.0
+$ git checkout v0.9.0
 $ make dep
 $ make install
 ```
@@ -348,7 +348,20 @@ We used the SDK to create the repository layout. This command is for memory ;) (
 > You need to have first install the SDK.
 
 ```
+#old version
 operator-sdk new cassandra-k8s-operator --api-version=db.orange.com/v1alpha1 --kind=CassandraCluster
+#new version
+operator-sdk new casskop --dep-manager=modules --repo=github.com.Orange-OpenSource/casskop --type=go
+```
+
+Then you want to add managers:
+
+```
+# Add a new API for the custom resource CassandraCluster
+$ operator-sdk add api --api-version=db.orange.com/v1alpha1 --kind=CassandraCluster
+
+# Add a new controller that watches for CassandraCluster
+$ operator-sdk add controller --api-version=db.orange.com/v1alpha1 --kind=CassandraCluster
 ```
 
 ## Useful Infos for developers
