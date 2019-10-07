@@ -6,7 +6,7 @@ metadata:
     cluster: k8s.pic
 spec:
   nodesPerRacks: 1
-  baseImage: cassandra
+  baseImage: skyuk/fake-cassandra
   version: latest
   imagePullPolicy: "IfNotPresent"
   rollingPartition: 0

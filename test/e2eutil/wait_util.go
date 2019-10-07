@@ -32,9 +32,9 @@ import (
 
 var (
 	RetryInterval        = time.Second * 10
-	Timeout              = time.Second * 600
+	Timeout              = time.Second * 300
 	CleanupRetryInterval = time.Second * 5
-	CleanupTimeout       = time.Second * 20
+	CleanupTimeout       = time.Second * 30
 )
 
 func helperLoadBytes(t *testing.T, name string) []byte {

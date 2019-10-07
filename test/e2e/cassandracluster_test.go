@@ -4,6 +4,10 @@ import (
 	goctx "context"
 	"errors"
 	"fmt"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/Orange-OpenSource/cassandra-k8s-operator/pkg/apis"
 	api "github.com/Orange-OpenSource/cassandra-k8s-operator/pkg/apis/db/v1alpha1"
 	"github.com/Orange-OpenSource/cassandra-k8s-operator/pkg/k8s"
@@ -17,9 +21,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
-	"os"
-	"testing"
-	"time"
 )
 
 // Run all fonctional tests
@@ -183,7 +184,7 @@ func cassandraClusterServiceTest(t *testing.T, f *framework.Framework, ctx *fram
 
 	services, err := listServices(namespace, metav1.ListOptions{
 		LabelSelector: labels.FormatLabels(map[string]string{
-			"app": "cassandracluster",
+			"app":              "cassandracluster",
 			"cassandracluster": cluster.Name,
 		}),
 	}, f)
@@ -227,7 +228,7 @@ func cassandraClusterServiceTest(t *testing.T, f *framework.Framework, ctx *fram
 
 func cassandraClusterUpdateConfigMapTest(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) {
 	namespace, err := ctx.GetNamespace()
-	if err != nil{
+	if err != nil {
 		t.Fatalf("Could not get namespace: %v", err)
 	}
 
@@ -239,7 +240,7 @@ func cassandraClusterUpdateConfigMapTest(t *testing.T, f *framework.Framework, c
 
 	logrus.Debugf("Creating cluster")
 	if err := f.Client.Create(goctx.TODO(), cluster, &framework.CleanupOptions{
-		TestContext: ctx,
+		TestContext:   ctx,
 		Timeout:       mye2eutil.CleanupTimeout,
 		RetryInterval: mye2eutil.CleanupRetryInterval}); err != nil && !apierrors.IsAlreadyExists(err) {
 		t.Fatalf("Error Creating CassandraCluster: %v", err)
@@ -334,8 +335,8 @@ func cassandraClusterCleanupTest(t *testing.T, f *framework.Framework, ctx *fram
 		dcRack := "dc1-" + rack
 		nodeName := fmt.Sprintf("%s-%s-%d", clusterName, dcRack, node)
 
-		dcRackStatus, found :=cc.Status.CassandraRackStatus[dcRack]
-		_, found =cc.Status.CassandraRackStatus[dcRack]
+		dcRackStatus, found := cc.Status.CassandraRackStatus[dcRack]
+		_, found = cc.Status.CassandraRackStatus[dcRack]
 		if !found {
 			return false, fmt.Errorf("Did not find rack status for %s", rack)
 		}
@@ -391,7 +392,6 @@ func cassandraClusterCleanupTest(t *testing.T, f *framework.Framework, ctx *fram
 			return false, nil
 		}
 
-
 		endTimeLabel, exists := pod.Labels["operation-end"]
 		if !exists {
 			t.Logf("Expected to find label operation-end on %s", nodeName)
@@ -410,7 +410,7 @@ func cassandraClusterCleanupTest(t *testing.T, f *framework.Framework, ctx *fram
 			return false, nil
 		}
 
-		if !endTime.After(startTime) {
+		if !endTime.After(startTime) && !endTime.Equal(startTime) {
 			t.Logf("Expected endTime (%s) to be after startTime (%s)", endTime, startTime)
 			return false, nil
 		}
@@ -435,13 +435,15 @@ func cassandraClusterCleanupTest(t *testing.T, f *framework.Framework, ctx *fram
 	}
 
 	logrus.Infof("Wait for cleanup to finish in rack1\n")
-	err = mye2eutil.WaitForStatusChange(t, f, namespace, clusterName, 1 * time.Second, 60 * time.Second, checkRack1)
+	err = mye2eutil.WaitForStatusChange(t, f, namespace, clusterName, mye2eutil.CleanupRetryInterval*time.Second,
+		mye2eutil.CleanupTimeout*time.Second,
+		checkRack1)
 	if err != nil {
 		t.Errorf("WaitForStatusChange failed: %s", err)
 	}
 
 	logrus.Infof("Wait for cleanup to finish in rack2\n")
-	err = mye2eutil.WaitForStatusChange(t, f, namespace, clusterName, 1 * time.Second, 60 * time.Second, checkRack2)
+	err = mye2eutil.WaitForStatusChange(t, f, namespace, clusterName, mye2eutil.CleanupRetryInterval*time.Second, mye2eutil.CleanupTimeout*time.Second, checkRack2)
 	if err != nil {
 		t.Errorf("WaitForStatusChange failed: %s", err)
 	}
