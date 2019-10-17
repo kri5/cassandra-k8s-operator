@@ -696,7 +696,7 @@ func createCassandraContainer(cc *api.CassandraCluster, status *api.CassandraClu
 				},
 			},
 		},
-		Env: createEnvVarForCassandraContainer(cc, status, resources, dcRackName),
+		//Env: createEnvVarForCassandraContainer(cc, status, resources, dcRackName),
 		ReadinessProbe: &v1.Probe{
 			InitialDelaySeconds: readinessInitialDelaySeconds,
 			TimeoutSeconds:      readinessHealthCheckTimeout,
@@ -720,7 +720,7 @@ func createCassandraContainer(cc *api.CassandraCluster, status *api.CassandraClu
 					Command: []string{
 						"/bin/bash",
 						"-c",
-						"nodetool status",
+						"/etc/cassandra/liveness-probe.sh",
 					},
 				},
 			},
